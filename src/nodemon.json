@@ -1,9 +1,0 @@
-{
-    "env": {
-        "MSSQL_USER": "SA",
-        "MSSQL_PASSWORD": "DockerSql2017!",
-        "MSSQL_SERVER": "localhost",
-        "MSSQL_DATABASE": "TaxNews",
-        "MSSQL_PORT": 11433
-    }
-}

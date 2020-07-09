@@ -3,68 +3,96 @@ const router = express.Router();
 var sql = require("mssql");
 
 router.get('/', (req, res, next) => {
-    var request = new sql.Request();
-    let newsList = [];
-    let news = {};
-    request.query('SELECT * FROM TB_NEWS', function (err, recordSetObject) {
-        if (err) { return res.status(500).send({ error: err }) }
+    try {
+        let request = new sql.Request();
+        let newsList = [];
+        let news = {};
 
-        let result = recordSetObject.recordset;
+        request
+            .query('SELECT * FROM TB_NEWS', function (err, recordSetObject) {
+                if (err) { return res.status(500).send({ error: err }) }
 
-        if (result) {
-            result.forEach((value) => {
-                news = {
-                    id: value.NEW_ID,
-                    text: value.NEW_TEXT,
-                    publish: value.NEW_PUBLISH,
-                    effective: value.NEW_EFFECTIVE,
-                    status: value.NEW_STATUS,
-                    publisher: value.NEW_PUBLISHER
-                };
-                newsList.push(news);
+                let result = recordSetObject.recordset;
+
+                if (result) {
+                    result.forEach((value) => {
+                        news = {
+                            id: value.NEW_ID,
+                            title: value.NEW_TITLE,
+                            uf: value.NEW_UF,
+                            text: value.NEW_TEXT,
+                            publish: value.NEW_PUBLISH,
+                            effective: value.NEW_EFFECTIVE,
+                            status: value.NEW_STATUS,
+                            publisher: value.NEW_PUBLISHER
+                        };
+                        newsList.push(news);
+                    });
+                }
+                return res.status(200).send(newsList);
             });
-        }
-        return res.status(200).send(newsList);
-    });
+    } catch (error) {
+        res.status(500).send({ error: error })
+    }
 });
 
 router.get('/:id_news', (req, res, next) => {
-    const id_news = req.params.id_news;
-    let news = {};
-    var request = new sql.Request();
-    request
-    .input('id_news', sql.Int, id_news)
-    .query('SELECT * FROM TB_NEWS WHERE NEW_ID = @id_news', function (err, recordSetObject) {
-        if (err) { return res.status(500).send({ error: err }) }
+    try {
+        const id_news = req.params.id_news;
+        let news = {};
+        let request = new sql.Request();
 
-        let result = recordSetObject.recordset[0];
+        request
+            .input('id_news', sql.Int, id_news)
+            .query('SELECT * FROM TB_NEWS WHERE NEW_ID = @id_news', function (err, recordSetObject) {
+                if (err) { return res.status(500).send({ error: err }) }
 
-        if (result) {
-            news = {
-                id: result.NEW_ID,
-                text: result.NEW_TEXT,
-                publish: result.NEW_PUBLISH,
-                effective: result.NEW_EFFECTIVE,
-                status: result.NEW_STATUS,
-                publisher: result.NEW_PUBLISHER
-            };
-        }
-        return res.status(200).send(news);
-    });
+                let result = recordSetObject.recordset[0];
+
+                if (result) {
+                    news = {
+                        id: result.NEW_ID,
+                        title: result.NEW_TITLE,
+                        uf: result.NEW_UF,
+                        text: result.NEW_TEXT,
+                        publish: result.NEW_PUBLISH,
+                        effective: result.NEW_EFFECTIVE,
+                        status: result.NEW_STATUS,
+                        publisher: result.NEW_PUBLISHER
+                    };
+                }
+                return res.status(200).send(news);
+            });
+    } catch (error) {
+        res.status(500).send({ error: error })
+    }
 });
 
 router.post('/', (req, res, next) => {
-    const news = {
-        id_news: req.body.id_news,
-        text: req.body.text,
-        publish_date: req.body.publish_date,
-        effective_date: req.body.effective_date
-    }
+    try {
+        let request = new sql.Request();
 
-    res.status(201).send({
-        mensagem: 'Insere uma nova noticia',
-        inserted_news: news
-    });
+        request
+            .input('title', req.body.title)
+            .input('uf', req.body.uf)
+            .input('text', req.body.text)
+            .input('publish', req.body.publish_date)
+            .input('effective', req.body.effective_date)
+            .input('status', req.body.status)
+            .input('publisher', req.body.publisher)
+            .query('INSERT INTO TB_NEWS (NEW_TITLE, NEW_UF, NEW_TEXT, NEW_PUBLISH, NEW_EFFECTIVE, NEW_STATUS, NEW_PUBLISHER) VALUES (@title, @uf, @text, @publish, @effective, @status, @publisher)', function (err, recordSetObject) {
+                if (err) { return res.status(500).send({ error: err }) }
+
+                if (recordSetObject.rowsAffected > 0) {
+                    return res.status(201).send({
+                        mensagem: 'Notícia cadastrada com sucesso!',
+                        inserted_news: req.body
+                    });
+                }
+            });
+    } catch (error) {
+        res.status(500).send({ error: error })
+    }
 });
 
 module.exports = router;
