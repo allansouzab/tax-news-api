@@ -1,9 +1,15 @@
 const express = require('express');
 const router = express.Router();
-var sql = require("mssql");
+const mssql = require("../mssql");
+const sql = require("mssql");
 
-router.get('/', (req, res, next) => {
+router.get('/', async (req, res, next) => {
     try {
+        let conn = await mssql.getConnection();
+
+        if (!conn._connected)
+            return res.status(500).send({ error: 'Database connection not provided.' })
+
         let request = new sql.Request();
         let newsList = [];
         let news = {};
@@ -36,8 +42,13 @@ router.get('/', (req, res, next) => {
     }
 });
 
-router.get('/:id_news', (req, res, next) => {
+router.get('/:id_news', async (req, res, next) => {
     try {
+        let conn = await mssql.getConnection();
+
+        if (!conn._connected)
+            return res.status(500).send({ error: 'Database connection not provided.' })
+
         const id_news = req.params.id_news;
         let news = {};
         let request = new sql.Request();
@@ -68,8 +79,13 @@ router.get('/:id_news', (req, res, next) => {
     }
 });
 
-router.post('/', (req, res, next) => {
+router.post('/', async (req, res, next) => {
     try {
+        let conn = await mssql.getConnection();
+
+        if (!conn._connected)
+            return res.status(500).send({ error: 'Database connection not provided.' })
+
         let request = new sql.Request();
 
         request
