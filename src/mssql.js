@@ -1,19 +1,17 @@
 var sql = require("mssql");
 
-// config for your database
 var config = {
-    "user": 'SA',
-    "password": 'DockerSql2017!',
-    "server": 'localhost',
-    "database": 'TaxNews',
-    "port": 11433,
+    "user": process.env.MSSQL_USER,
+    "password": process.env.MSSQL_PASSWORD,
+    "server": process.env.MSSQL_SERVER,
+    "database": process.env.MSSQL_DATABASE,
+    "port": Number(process.env.MSSQL_PORT),
     "dialect": "mssql",
     "dialectOptions": {
         "instanceName": "SQLEXPRESS"
     }
 };
 
-// connect to your database
 sql.connect(config, function (err) {
     if (err) {
         console.log(err);
