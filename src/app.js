@@ -6,6 +6,7 @@ const connectionSql = require('./mssql');
 
 const newsRoute = require('./routes/news.route');
 const favoritesRoute = require('./routes/favorites.route');
+const reminderNotesRoute = require('./routes/reminderNotes.route');
 
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -27,6 +28,7 @@ app.use((req, res, next) => {
 
 app.use('/api/news', newsRoute);
 app.use('/api/favorites', favoritesRoute);
+app.use('/api/reminder', reminderNotesRoute);
 
 app.use((error, req, res, next) => {
     res.status(error.status || 500);
