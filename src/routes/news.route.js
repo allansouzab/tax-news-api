@@ -3,6 +3,20 @@ const router = express.Router();
 const mssql = require("../mssql");
 const sql = require("mssql");
 
+router.get('/teste', async (req, res, next) => {
+    try {
+        let conn = await mssql.getConnection();
+        let connected = false;
+
+        if (conn._connected)
+            connected = true;
+        return res.status(200).send({ env: process.env, conn: connected });
+    } catch (error) {
+        res.status(500).send(error);
+    }
+
+});
+
 router.get('/', async (req, res, next) => {
     try {
         let conn = await mssql.getConnection();

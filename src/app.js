@@ -2,7 +2,6 @@ const express = require('express');
 const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
-const connectionSql = require('./mssql');
 
 const newsRoute = require('./routes/news.route');
 const favoritesRoute = require('./routes/favorites.route');
@@ -29,6 +28,14 @@ app.use((req, res, next) => {
 app.use('/api/news', newsRoute);
 app.use('/api/favorites', favoritesRoute);
 app.use('/api/reminder', reminderNotesRoute);
+
+app.get('/', (req, res) => {
+    res.status(200).send({
+        success: 'true',
+        message: 'API de notícias sobre o mercado tributário.',
+        version: '1.0.0',
+    });
+});
 
 app.use((error, req, res, next) => {
     res.status(error.status || 500);
