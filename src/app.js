@@ -29,9 +29,9 @@ app.use('/api/news', newsRoute);
 app.use('/api/favorites', favoritesRoute);
 app.use('/api/reminder', reminderNotesRoute);
 
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
     res.status(200).send({
-        success: 'true',
+        success: true,
         message: 'API de notícias sobre o mercado tributário.',
         version: '1.0.0',
     });
