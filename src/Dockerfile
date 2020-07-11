@@ -10,4 +10,4 @@ ENV PORT=3000
 
 EXPOSE $PORT
 
-ENTRYPOINT ["node", "server"]
+ENTRYPOINT ["npm", "start"]
