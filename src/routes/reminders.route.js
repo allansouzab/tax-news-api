@@ -16,7 +16,7 @@ router.get('/', async (req, res, next) => {
 
         let query = await new sql.Request()
             .input('user', user)
-            .query('SELECT REM_ID, REM_DATE, NEW_ID, NEW_TITLE FROM TB_REMINDER INNER JOIN TB_NEWS ON NEW_ID = REM_NEW WHERE REM_USER = @user');
+            .query('SELECT REM_ID, REM_DATE, NEW_ID, NEW_TITLE FROM TB_REMINDERS INNER JOIN TB_NEWS ON NEW_ID = REM_NEW WHERE REM_USER = @user');
 
         let result = query.recordset;
 
@@ -33,7 +33,7 @@ router.get('/', async (req, res, next) => {
         }
         return res.status(200).send(reminderList);
     } catch (error) {
-        res.status(500).send({ error: error })
+        res.status(500).send({ error: error.message })
     }
 });
 
@@ -44,11 +44,20 @@ router.post('/', async (req, res, next) => {
         if (!conn._connected)
             return res.status(500).send({ error: 'Database connection not provided.' })
 
+        let result = await new sql.Request()
+            .input('new_id', req.body.new_id)
+            .input('user', req.body.user)
+            .query('SELECT TOP 1 * FROM TB_REMINDERS WHERE REM_NEW = @new_id AND REM_USER = @user');
+
+        if (result.recordset.length > 0) {
+            return res.status(409).send({ error: 'Esta notícia já está salva nos seus lembretes.' })
+        }
+
         let query = await new sql.Request()
             .input('new_id', req.body.new_id)
             .input('date', req.body.date)
             .input('user', req.body.user)
-            .query('INSERT INTO TB_REMINDER (REM_NEW, REM_DATE, REM_USER) VALUES (@new_id, @date, @user)');
+            .query('INSERT INTO TB_REMINDERS (REM_NEW, REM_DATE, REM_USER) VALUES (@new_id, @date, @user)');
 
         if (query.rowsAffected > 0) {
             return res.status(201).send({
@@ -57,13 +66,13 @@ router.post('/', async (req, res, next) => {
             });
         }
 
-        return res.status(201).send({
+        return res.status(400).send({
             message: 'Não foi possível cadastrar um lembrete de notícia.',
             inserted_reminder: req.body
         });
 
     } catch (error) {
-        res.status(500).send({ error: error })
+        res.status(500).send({ error: error.message })
     }
 });
 
@@ -78,7 +87,7 @@ router.delete('/:id_reminder', async (req, res, next) => {
 
         let query = await new sql.Request()
             .input('id', id_reminder)
-            .query('DELETE FROM TB_REMINDER WHERE REM_ID = @id');
+            .query('DELETE FROM TB_REMINDERS WHERE REM_ID = @id');
 
         if (query.rowsAffected > 0) {
             return res.status(202).send({
@@ -92,7 +101,7 @@ router.delete('/:id_reminder', async (req, res, next) => {
             deleted_reminder_id: id_reminder
         });
     } catch (error) {
-        res.status(500).send({ error: error })
+        res.status(500).send({ error: error.message })
     }
 });
 

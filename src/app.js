@@ -5,7 +5,8 @@ const bodyParser = require('body-parser');
 
 const newsRoute = require('./routes/news.route');
 const favoritesRoute = require('./routes/favorites.route');
-const reminderNotesRoute = require('./routes/reminderNotes.route');
+const remindersRoute = require('./routes/reminders.route');
+const usersRoute = require('./routes/users.route');
 
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -27,7 +28,8 @@ app.use((req, res, next) => {
 
 app.use('/api/news', newsRoute);
 app.use('/api/favorites', favoritesRoute);
-app.use('/api/reminder', reminderNotesRoute);
+app.use('/api/reminders', remindersRoute);
+app.use('/api/users', usersRoute);
 
 app.get('/api', (req, res) => {
     res.status(200).send({

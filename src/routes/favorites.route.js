@@ -34,7 +34,7 @@ router.get('/', async (req, res, next) => {
         return res.status(200).send(favList);
 
     } catch (error) {
-        res.status(500).send({ error: error })
+        res.status(500).send({ error: error.message })
     }
 });
 
@@ -44,6 +44,15 @@ router.post('/', async (req, res, next) => {
 
         if (!conn._connected)
             return res.status(500).send({ error: 'Database connection not provided.' })
+
+        let result = await new sql.Request()
+            .input('new_id', req.body.new_id)
+            .input('user', req.body.user)
+            .query('SELECT TOP 1 * FROM TB_FAVORITES WHERE FAV_NEW = @new_id AND FAV_USER = @user');
+
+        if (result.recordset.length > 0) {
+            return res.status(409).send({ error: 'Esta notícia já está salva nos seus favoritos.' })
+        }
 
         let query = await new sql.Request()
             .input('new_id', req.body.new_id)
@@ -63,7 +72,7 @@ router.post('/', async (req, res, next) => {
         });
 
     } catch (error) {
-        res.status(500).send({ error: error })
+        res.status(500).send({ error: error.message })
     }
 });
 
@@ -92,7 +101,7 @@ router.delete('/:id_fav', async (req, res, next) => {
             deleted_fav_id: id_fav
         });
     } catch (error) {
-        res.status(500).send({ error: error })
+        res.status(500).send({ error: error.message })
     }
 });
 
