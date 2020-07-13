@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const mssql = require("../mssql");
 const sql = require("mssql");
+const autenticator = require('../middleware/autenticator');
 
-router.get('/', async (req, res, next) => {
+router.get('/', autenticator.login, async (req, res, next) => {
     try {
         let conn = await mssql.getConnection();
 
@@ -12,10 +13,10 @@ router.get('/', async (req, res, next) => {
 
         let reminderList = [];
         let reminder = {};
-        const user = req.headers.user;
+        const user = req.user;
 
         let query = await new sql.Request()
-            .input('user', user)
+            .input('user', user.id)
             .query('SELECT REM_ID, REM_DATE, NEW_ID, NEW_TITLE FROM TB_REMINDERS INNER JOIN TB_NEWS ON NEW_ID = REM_NEW WHERE REM_USER = @user');
 
         let result = query.recordset;
@@ -37,16 +38,18 @@ router.get('/', async (req, res, next) => {
     }
 });
 
-router.post('/', async (req, res, next) => {
+router.post('/', autenticator.login, async (req, res, next) => {
     try {
         let conn = await mssql.getConnection();
 
         if (!conn._connected)
             return res.status(500).send({ error: 'Database connection not provided.' })
 
+        const user = req.user;
+
         let result = await new sql.Request()
             .input('new_id', req.body.new_id)
-            .input('user', req.body.user)
+            .input('user', req.user.id)
             .query('SELECT TOP 1 * FROM TB_REMINDERS WHERE REM_NEW = @new_id AND REM_USER = @user');
 
         if (result.recordset.length > 0) {
@@ -56,7 +59,7 @@ router.post('/', async (req, res, next) => {
         let query = await new sql.Request()
             .input('new_id', req.body.new_id)
             .input('date', req.body.date)
-            .input('user', req.body.user)
+            .input('user', req.user.id)
             .query('INSERT INTO TB_REMINDERS (REM_NEW, REM_DATE, REM_USER) VALUES (@new_id, @date, @user)');
 
         if (query.rowsAffected > 0) {
@@ -76,7 +79,7 @@ router.post('/', async (req, res, next) => {
     }
 });
 
-router.delete('/:id_reminder', async (req, res, next) => {
+router.delete('/:id_reminder', autenticator.login, async (req, res, next) => {
     try {
         let conn = await mssql.getConnection();
 

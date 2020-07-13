@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const mssql = require("../mssql");
 const sql = require("mssql");
+const autenticator = require('../middleware/autenticator');
 
-router.get('/', async (req, res, next) => {
+router.get('/', autenticator.login, async (req, res, next) => {
     try {
         let conn = await mssql.getConnection();
 
@@ -12,11 +13,11 @@ router.get('/', async (req, res, next) => {
 
         let favList = [];
         let fav = {};
-        const user = req.headers.user;
+        let user = req.user;
 
         let query = await new sql.Request()
-            .input('user', user)
-            .query('SELECT FAV_ID, FAV_DATE, NEW_ID, NEW_TITLE FROM TB_FAVORITES INNER JOIN TB_NEWS ON NEW_ID = FAV_NEW WHERE FAV_USER = @user');
+            .input('email', user.email)
+            .query('SELECT FAV_ID, FAV_DATE, NEW_ID, NEW_TITLE FROM TB_FAVORITES INNER JOIN TB_NEWS ON NEW_ID = FAV_NEW INNER JOIN TB_USERS ON USE_ID = FAV_USER WHERE USE_EMAIL = @email');
 
         let result = query.recordset;
 
@@ -38,17 +39,19 @@ router.get('/', async (req, res, next) => {
     }
 });
 
-router.post('/', async (req, res, next) => {
+router.post('/', autenticator.login, async (req, res, next) => {
     try {
         let conn = await mssql.getConnection();
 
         if (!conn._connected)
             return res.status(500).send({ error: 'Database connection not provided.' })
 
+        let user = req.user;
+
         let result = await new sql.Request()
             .input('new_id', req.body.new_id)
-            .input('user', req.body.user)
-            .query('SELECT TOP 1 * FROM TB_FAVORITES WHERE FAV_NEW = @new_id AND FAV_USER = @user');
+            .input('email', user.email)
+            .query('SELECT TOP 1 * FROM TB_FAVORITES INNER JOIN TB_USERS ON USE_ID = FAV_USER WHERE FAV_NEW = @new_id AND USE_EMAIL = @email');
 
         if (result.recordset.length > 0) {
             return res.status(409).send({ error: 'Esta notícia já está salva nos seus favoritos.' })
@@ -57,7 +60,7 @@ router.post('/', async (req, res, next) => {
         let query = await new sql.Request()
             .input('new_id', req.body.new_id)
             .input('date', req.body.date)
-            .input('user', req.body.user)
+            .input('user', user.id)
             .query('INSERT INTO TB_FAVORITES (FAV_NEW, FAV_DATE, FAV_USER) VALUES (@new_id, @date, @user)');
 
         if (query.rowsAffected > 0) {
@@ -76,7 +79,7 @@ router.post('/', async (req, res, next) => {
     }
 });
 
-router.delete('/:id_fav', async (req, res, next) => {
+router.delete('/:id_fav', autenticator.login, async (req, res, next) => {
     try {
         let conn = await mssql.getConnection();
 
@@ -89,7 +92,7 @@ router.delete('/:id_fav', async (req, res, next) => {
             .input('id', id_fav)
             .query('DELETE FROM TB_FAVORITES WHERE FAV_ID = @id');
 
-        if (recordSetObject.rowsAffected > 0) {
+        if (query.rowsAffected > 0) {
             return res.status(202).send({
                 message: 'Notícia favorita deletada com sucesso!',
                 deleted_fav_id: id_fav

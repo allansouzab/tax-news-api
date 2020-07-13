@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mssql = require("../mssql");
 const sql = require("mssql");
+const autenticator = require('../middleware/autenticator');
 
 router.get('/', async (req, res, next) => {
     try {
@@ -72,7 +73,7 @@ router.get('/:id_news', async (req, res, next) => {
     }
 });
 
-router.post('/', async (req, res, next) => {
+router.post('/', autenticator.administrator, async (req, res, next) => {
     try {
         let conn = await mssql.getConnection();
 
@@ -86,7 +87,7 @@ router.post('/', async (req, res, next) => {
             .input('publish', req.body.publish_date)
             .input('effective', req.body.effective_date)
             .input('status', 1)
-            .input('publisher', req.body.publisher)
+            .input('publisher', req.user.id)
             .query('INSERT INTO TB_NEWS (NEW_TITLE, NEW_UF, NEW_TEXT, NEW_PUBLISH, NEW_EFFECTIVE, NEW_STATUS, NEW_PUBLISHER) VALUES (@title, @uf, @text, @publish, @effective, @status, @publisher)');
 
         if (query.rowsAffected > 0) {
@@ -106,7 +107,7 @@ router.post('/', async (req, res, next) => {
     }
 });
 
-router.put('/', async (req, res, next) => {
+router.put('/', autenticator.administrator, async (req, res, next) => {
     try {
         let conn = await mssql.getConnection();
 
@@ -121,7 +122,7 @@ router.put('/', async (req, res, next) => {
             .input('publish', req.body.publish_date)
             .input('effective', req.body.effective_date)
             .input('status', req.body.status)
-            .input('publisher', req.body.publisher)
+            .input('publisher', req.user.id)
             .query('UPDATE TB_NEWS SET NEW_TITLE = @title, NEW_UF = @uf, NEW_TEXT = @text, NEW_PUBLISH = @publish, NEW_EFFECTIVE = @effective, NEW_STATUS = @status, NEW_PUBLISHER = @publisher WHERE NEW_ID = @id');
 
         if (query.rowsAffected > 0) {
@@ -141,7 +142,7 @@ router.put('/', async (req, res, next) => {
     }
 });
 
-router.delete('/:id_news', async (req, res, next) => {
+router.delete('/:id_news', autenticator.administrator, async (req, res, next) => {
     try {
         let conn = await mssql.getConnection();
 
