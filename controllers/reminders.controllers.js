@@ -5,7 +5,7 @@ exports.getReminders = async (req, res, next) => {
     try {
         let conn = await mssql.getConnection();
 
-        if (!conn._connected)
+        if (!conn._connected || !conn)
             return res.status(500).send({ error: 'Database connection not provided.' })
 
         let reminderList = [];
@@ -39,7 +39,7 @@ exports.postReminder = async (req, res, next) => {
     try {
         let conn = await mssql.getConnection();
 
-        if (!conn._connected)
+        if (!conn._connected || !conn)
             return res.status(500).send({ error: 'Database connection not provided.' })
 
         const user = req.user;
@@ -80,7 +80,7 @@ exports.deleteReminder = async (req, res, next) => {
     try {
         let conn = await mssql.getConnection();
 
-        if (!conn._connected)
+        if (!conn._connected || !conn)
             return res.status(500).send({ error: 'Database connection not provided.' })
 
         const id_reminder = req.params.id_reminder;

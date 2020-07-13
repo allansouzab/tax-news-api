@@ -20,7 +20,7 @@ exports.administrator = async (req, res, next) => {
 
         let conn = await mssql.getConnection();
 
-        if (!conn._connected)
+        if (!conn._connected || !conn)
             return res.status(500).send({ error: 'Database connection not provided.' })
 
         let query = await new sql.Request()

@@ -5,7 +5,7 @@ exports.getNews = async (req, res, next) => {
     try {
         let conn = await mssql.getConnection();
 
-        if (!conn._connected)
+        if (!conn._connected || !conn)
             return res.status(500).send({ error: 'Database connection not provided.' })
 
         let newsList = [];
@@ -40,7 +40,7 @@ exports.getSingleNew = async (req, res, next) => {
     try {
         let conn = await mssql.getConnection();
 
-        if (!conn._connected)
+        if (!conn._connected || !conn)
             return res.status(500).send({ error: 'Database connection not provided.' })
 
         const id_news = req.params.id_news;
@@ -74,7 +74,7 @@ exports.postNew = async (req, res, next) => {
     try {
         let conn = await mssql.getConnection();
 
-        if (!conn._connected)
+        if (!conn._connected || !conn)
             return res.status(500).send({ error: 'Database connection not provided.' })
 
         let query = await new sql.Request()
@@ -108,7 +108,7 @@ exports.updateNew = async (req, res, next) => {
     try {
         let conn = await mssql.getConnection();
 
-        if (!conn._connected)
+        if (!conn._connected || !conn)
             return res.status(500).send({ error: 'Database connection not provided.' })
 
         let query = await new sql.Request()
@@ -143,7 +143,7 @@ exports.deleteNew = async (req, res, next) => {
     try {
         let conn = await mssql.getConnection();
 
-        if (!conn._connected)
+        if (!conn._connected || !conn)
             return res.status(500).send({ error: 'Database connection not provided.' })
 
         const id_news = req.params.id_news;
