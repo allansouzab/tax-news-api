@@ -7,7 +7,7 @@ exports.register = async (req, res, next) => {
     try {
         let conn = await mssql.getConnection();
 
-        if (!conn._connected)
+        if (!conn._connected || !conn)
             return res.status(500).send({ error: 'Database connection not provided.' })
 
         bcrypt.hash(req.body.password, 10, async (errBcrypt, hash) => {
@@ -51,7 +51,7 @@ exports.login = async (req, res, next) => {
     try {
         let conn = await mssql.getConnection();
 
-        if (!conn._connected)
+        if (!conn._connected || !conn)
             return res.status(500).send({ error: 'Database connection not provided.' })
 
         let result = await new sql.Request()

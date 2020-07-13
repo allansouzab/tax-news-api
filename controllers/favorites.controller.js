@@ -5,7 +5,7 @@ exports.getFavorites = async (req, res, next) => {
     try {
         let conn = await mssql.getConnection();
 
-        if (!conn._connected)
+        if (!conn._connected || !conn)
             return res.status(500).send({ error: 'Database connection not provided.' })
 
         let favList = [];
@@ -40,7 +40,7 @@ exports.postFavorite = async (req, res, next) => {
     try {
         let conn = await mssql.getConnection();
 
-        if (!conn._connected)
+        if (!conn._connected || !conn)
             return res.status(500).send({ error: 'Database connection not provided.' })
 
         let user = req.user;
@@ -80,7 +80,7 @@ exports.deleteFavorite = async (req, res, next) => {
     try {
         let conn = await mssql.getConnection();
 
-        if (!conn._connected)
+        if (!conn._connected || !conn)
             return res.status(500).send({ error: 'Database connection not provided.' })
 
         const id_fav = req.params.id_fav;
