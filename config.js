@@ -16,7 +16,7 @@ const {
 } = process.env;
 
 // validate the required configuration information
-assert(SQL_PORT, "PORT configuration is required.");
+assert(SQL_PORT, "SQL_PORT configuration is required.");
 assert(SQL_SERVER, "SQL_SERVER configuration is required.");
 assert(SQL_DATABASE, "SQL_DATABASE configuration is required.");
 assert(SQL_USER, "SQL_USER configuration is required.");
