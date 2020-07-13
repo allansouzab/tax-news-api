@@ -72,7 +72,7 @@ exports.login = async (req, res, next) => {
                     nome: result.recordset[0].USE_NOME,
                 }, process.env.JWT_KEY, { expiresIn: "1h" });
 
-                return res.status(200).send({ message: 'Autenticado com sucesso.', token: token })
+                return res.status(200).send({ message: 'Autenticado com sucesso.', token: token, administrator: Boolean(result.recordset[0].USE_ADM) })
             }
 
             return res.status(401).send({ error: 'Falha na autenticação.' })
